@@ -1,0 +1,5 @@
+*.rpm
+*.bkp
+chef-elk/chef-pem-files
+*/*.rpm
+*/*.bkp

@@ -1,0 +1,153 @@
+#!/bin/bash
+
+set -e
+
+## Chef Highlander : There Can Be Only One
+## Single Demo Server for both Chef and OSS ELK for Demo Purposes
+
+################# NOTES ###################
+
+sudo yum upgrade -y
+sudo yum install tree vim git -y ## Optional tools to make life easier
+sudo yum install wget -y ## Not optional
+
+## Tested on CentOS 7
+## Source: https://docs.chef.io/install_server.html
+## Verify ports on instance / server are open: https://docs.chef.io/server_firewalls_and_ports.html
+## Intended for Demo use only
+## Make sure to change # FIXME lines as needed
+##
+## Elastic is consistent-ish with their naming conventions for past versions
+## Please reference their page if you wish to download a different version
+## than either of the two below:
+##    https://www.elastic.co/downloads/past-releases/
+ELKVERSION="7.0.0"
+#ELKVERSION="6.5.4"
+
+if [ -z ${ELKVERSION} ]; then
+    echo -e "Please uncomment desired version before running script.\n"
+    exit 0
+fi
+
+################# CHEF ###################
+DEMOPATH="chef-pem-files"
+
+mkdir -p ${DEMOPATH}
+
+# Setting up the Chef user
+ USERNAME="jaynecobb"      # FIXME
+ FORENAME="Jayne"          # FIXME
+ SURNAME="Cobb"            # FIXME
+ EMAIL="vera@firefly.net"  # FIXME
+ PASSWORD="chef-logzio"    # FIXME
+ FILENAME="${DEMOPATH}/demo.pem"
+
+# Setting up the Chef org
+ SHORTNAME="firefly"       # FIXME
+ ORGNAME="Firefly Logz"    # FIXME
+ ASSOCUSER="${USERNAME}"
+ ORGFILE="${DEMOPATH}/${SHORTNAME}-validator.pem"
+
+#CHEFVERSION="12.19.31"
+
+echo -e "Installing Chef Stable release 12.19.31.\nYou will need to accept license agreement to continue.\n\n"
+sleep .5
+
+# Base Chef server
+sudo yum install wget -y
+wget https://packages.chef.io/files/stable/chef-server/12.19.31/el/7/chef-server-core-12.19.31-1.el7.x86_64.rpm -P /tmp/
+sudo rpm -Uvh /tmp/chef-server-core-12.19.31-1.el7.x86_64.rpm
+
+echo "Running 'reconfigure', may take up to 5 minutes"
+ sudo chef-server-ctl reconfigure
+echo "Creating chef user ${USERNAME}"
+ echo "sudo chef-server-ctl user-create ${USERNAME} ${FORENAME} ${SURNAME} ${EMAIL} '${PASSWORD}' --filename ${FILENAME}"
+ sudo chef-server-ctl user-create ${USERNAME} ${FORENAME} ${SURNAME} ${EMAIL} '${PASSWORD}' --filename ${FILENAME}
+echo "Creating chef org ${ORGNAME}"
+ echo "sudo chef-server-ctl org-create ${SHORTNAME} '${ORGNAME}' --association_user ${ASSOCUSER} --filename ${ORGFILE}"
+ sudo chef-server-ctl org-create ${SHORTNAME} '${ORGNAME}' --association_user ${ASSOCUSER} --filename ${ORGFILE}
+
+# Chef Management Console (optional: if UI needed in demo)
+ sudo chef-server-ctl install chef-manage
+ sudo chef-server-ctl reconfigure
+ sudo chef-manage-ctl reconfigure
+
+echo -e "\n\n\nYou now have a single Chef server, onto Filebeat\n\n\n"
+sleep .5
+
+
+################ FILEBEAT ##################
+# Logzio SSL cert
+sudo wget https://raw.githubusercontent.com/logzio/public-certificates/master/COMODORSADomainValidationSecureServerCA.crt -P /etc/pki/tls/certs/
+
+FILE="filebeat-${ELKVERSION}-x86_64.rpm"
+
+curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/${FILE}
+sudo rpm -vi ${FILE}
+sudo chkconfig --add filebeat
+sudo mv /etc/filebeat/filebeat.yml{,.bkp}
+sudo cp filebeat-demo.yml /etc/filebeat/filebeat.yml
+sudo service filebeat start
+filebeat version
+
+rm ${FILE}
+
+
+############# ELASTICSEARCH ################
+echo -e "Starting Elasticsearch ${ELKVERSION} installation\n\n\n"
+sleep .5
+
+## Needed to add some logic because consistent naming is hard
+if [ ${ELKVERSION} == "7.0.0" ]; then
+    FILE="elasticsearch-${ELKVERSION}-x86_64.rpm"
+else
+    FILE="elasticsearch-${ELKVERSION}.rpm"
+fi
+echo "${FILE}"
+
+## Install Java 8
+sudo yum install java-1.8.0-openjdk.x86_64 -y
+java -version
+
+## Install elasticsearch itself
+wget https://artifacts.elastic.co/downloads/elasticsearch/${FILE}
+sudo rpm -ivh ${FILE}
+sudo mv /etc/elasticsearch/elasticsearch.yml{,.bkp}
+sudo cp elasticsearch-demo.yml /etc/elasticsearch/elasticsearch.yml
+sudo systemctl enable elasticsearch.service
+sudo service elasticsearch start
+sudo service elasticsearch status
+rm ${FILE}
+
+
+############### LOGSTASH ##################
+echo -e "\n\n\nStarting Logstash ${ELKVERSION} installation\n\n\n"
+sleep .5
+
+FILE="logstash-${ELKVERSION}.rpm"
+
+wget https://artifacts.elastic.co/downloads/logstash/${FILE}
+sudo rpm -ivh ${FILE}
+sudo systemctl enable logstash.service
+sudo service logstash start
+sudo service logstash status
+rm ${FILE}
+
+
+################ KIBANA ##################
+echo -e "\n\n\nStarting Kibana ${ELKVERSION} installation\n\n\n"
+sleep .5
+
+FILE="kibana-${ELKVERSION}-x86_64.rpm"
+
+## Install Kibana itself
+wget https://artifacts.elastic.co/downloads/kibana/${FILE}
+sudo rpm -ivh ${FILE}
+sudo mv /etc/kibana/kibana.yml{,.bkp}
+sudo cp kibana-demo.yml /etc/kibana/kibana.yml
+sudo systemctl enable kibana.service
+sudo service kibana start
+sudo service kibana status
+rm ${FILE}
+
+exit 0
