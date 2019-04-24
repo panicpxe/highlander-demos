@@ -50,7 +50,7 @@ mkdir -p ${DEMOPATH}
 
 #CHEFVERSION="12.19.31"
 
-echo -e "Installing Chef Stable release 12.19.31.\nYou will need to accept license agreement to continue.\n\n"
+echo -e "\n\n\nInstalling Chef Stable release 12.19.31.\nYou will need to accept license agreement to continue.\n\n"
 sleep .5
 
 # Base Chef server
