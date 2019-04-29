@@ -11,6 +11,15 @@ sudo yum upgrade -y
 sudo yum install tree vim git -y ## Optional tools to make life easier
 sudo yum install wget -y ## Not optional
 
+infomsg (){
+    tput setaf 2; tput bold; echo -e "\n\nHighlander Msg:"
+    tput setaf 3; tput bold; echo -e "${1}\n\n"; tput sgr0
+}
+errormsg (){
+    tput setaf 2; tput bold; echo -e "Highlander Msg:"
+    tput setaf 1; tput bold; echo -e "${1}\n"; tput sgr0
+}
+
 ## Tested on CentOS 7
 ## Source: https://docs.chef.io/install_server.html
 ## Verify ports on instance / server are open: https://docs.chef.io/server_firewalls_and_ports.html
@@ -25,58 +34,9 @@ ELKVERSION="7.0.0"
 #ELKVERSION="6.5.4"
 
 if [ -z ${ELKVERSION} ]; then
-    echo -e "Please uncomment desired version before running script.\n"
+    errormsg "Please uncomment desired version before running script."
     exit 1
 fi
-
-################# CHEF ###################
-DEMOPATH="chef-pem-files"
-
-mkdir -p ${DEMOPATH}
-
-# Setting up the Chef user
- USERNAME="jaynecobb"      # FIXME
- FORENAME="Jayne"          # FIXME
- SURNAME="Cobb"            # FIXME
- EMAIL="vera@firefly.net"  # FIXME
- PASSWORD="chef-logzio"    # FIXME
- FILENAME="${DEMOPATH}/demo.pem"
-
-# Setting up the Chef org
- SHORTNAME="firefly"       # FIXME
- ORGNAME="Firefly Logz"    # FIXME
- ASSOCUSER="${USERNAME}"
- ORGFILE="${DEMOPATH}/${SHORTNAME}-validator.pem"
-
-CHEFVERSION="12.19.31"
-
-echo -e "\n\n\nInstalling Chef Stable release 12.19.31.\nYou will need to accept license agreement to continue.\n\n"
-sleep .5
-
-# Base Chef server
-sudo yum install wget -y
-
-CHEFFILE="chef-server-core-${CHEFVERSION}-1.el7.x86_64.rpm"
-wget https://packages.chef.io/files/stable/chef-server/${CHEFVERSION}/el/7/${CHEFFILE} -P /tmp/
-sudo rpm -Uvh /tmp/${CHEFFILE}
-
-echo -e "\n\nRunning 'reconfigure', may take up to 5 minutes\n\n"
- sudo chef-server-ctl reconfigure
-echo -e "\n\nCreating chef user ${USERNAME}\n\n"
- echo -e "\n\nsudo chef-server-ctl user-create ${USERNAME} ${FORENAME} ${SURNAME} ${EMAIL} '${PASSWORD}' --filename ${FILENAME}\n\n"
- sudo chef-server-ctl user-create ${USERNAME} ${FORENAME} ${SURNAME} ${EMAIL} '${PASSWORD}' --filename ${FILENAME}
-echo -e "\n\nCreating chef org ${ORGNAME}\n\n"
- echo -e "\n\nsudo chef-server-ctl org-create ${SHORTNAME} '${ORGNAME}' --association_user ${ASSOCUSER} --filename ${ORGFILE}\n\n"
- sudo chef-server-ctl org-create ${SHORTNAME} '${ORGNAME}' --association_user ${ASSOCUSER} --filename ${ORGFILE}
-
-# Chef Management Console (optional: if UI needed in demo)
- sudo chef-server-ctl install chef-manage
- sudo chef-server-ctl reconfigure
- sudo chef-manage-ctl reconfigure
-
-echo -e "\n\n\nYou now have a single Chef server, onto Filebeat\n\n\n"
-sleep .5
-
 
 ################ FILEBEAT ##################
 # Logzio SSL cert
@@ -96,8 +56,8 @@ rm ${FILE}
 
 
 ############# ELASTICSEARCH ################
-echo -e "Starting Elasticsearch ${ELKVERSION} installation\n\n\n"
-sleep .5
+infomsg "Starting Elasticsearch ${ELKVERSION} installation"
+sleep 1
 
 ## Needed to add some logic because consistent naming is hard
 if [ ${ELKVERSION} == "7.0.0" ]; then
@@ -123,8 +83,8 @@ rm ${FILE}
 
 
 ############### LOGSTASH ##################
-echo -e "\n\n\nStarting Logstash ${ELKVERSION} installation\n\n\n"
-sleep .5
+infomsg "Starting Logstash ${ELKVERSION} installation"
+sleep 1
 
 FILE="logstash-${ELKVERSION}.rpm"
 
@@ -137,8 +97,8 @@ rm ${FILE}
 
 
 ################ KIBANA ##################
-echo -e "\n\n\nStarting Kibana ${ELKVERSION} installation\n\n\n"
-sleep .5
+infomsg "Starting Kibana ${ELKVERSION} installation"
+sleep 1
 
 FILE="kibana-${ELKVERSION}-x86_64.rpm"
 
