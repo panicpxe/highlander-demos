@@ -48,23 +48,25 @@ mkdir -p ${DEMOPATH}
  ASSOCUSER="${USERNAME}"
  ORGFILE="${DEMOPATH}/${SHORTNAME}-validator.pem"
 
-#CHEFVERSION="12.19.31"
+CHEFVERSION="12.19.31"
 
 echo -e "\n\n\nInstalling Chef Stable release 12.19.31.\nYou will need to accept license agreement to continue.\n\n"
 sleep .5
 
 # Base Chef server
 sudo yum install wget -y
-wget https://packages.chef.io/files/stable/chef-server/12.19.31/el/7/chef-server-core-12.19.31-1.el7.x86_64.rpm -P /tmp/
-sudo rpm -Uvh /tmp/chef-server-core-12.19.31-1.el7.x86_64.rpm
 
-echo "Running 'reconfigure', may take up to 5 minutes"
+CHEFFILE="chef-server-core-${CHEFVERSION}-1.el7.x86_64.rpm"
+wget https://packages.chef.io/files/stable/chef-server/${CHEFVERSION}/el/7/${CHEFFILE} -P /tmp/
+sudo rpm -Uvh /tmp/${CHEFFILE}
+
+echo -e "\n\nRunning 'reconfigure', may take up to 5 minutes\n\n"
  sudo chef-server-ctl reconfigure
-echo "Creating chef user ${USERNAME}"
- echo "sudo chef-server-ctl user-create ${USERNAME} ${FORENAME} ${SURNAME} ${EMAIL} '${PASSWORD}' --filename ${FILENAME}"
+echo -e "\n\nCreating chef user ${USERNAME}\n\n"
+ echo -e "\n\nsudo chef-server-ctl user-create ${USERNAME} ${FORENAME} ${SURNAME} ${EMAIL} '${PASSWORD}' --filename ${FILENAME}\n\n"
  sudo chef-server-ctl user-create ${USERNAME} ${FORENAME} ${SURNAME} ${EMAIL} '${PASSWORD}' --filename ${FILENAME}
-echo "Creating chef org ${ORGNAME}"
- echo "sudo chef-server-ctl org-create ${SHORTNAME} '${ORGNAME}' --association_user ${ASSOCUSER} --filename ${ORGFILE}"
+echo -e "\n\nCreating chef org ${ORGNAME}\n\n"
+ echo -e "\n\nsudo chef-server-ctl org-create ${SHORTNAME} '${ORGNAME}' --association_user ${ASSOCUSER} --filename ${ORGFILE}\n\n"
  sudo chef-server-ctl org-create ${SHORTNAME} '${ORGNAME}' --association_user ${ASSOCUSER} --filename ${ORGFILE}
 
 # Chef Management Console (optional: if UI needed in demo)

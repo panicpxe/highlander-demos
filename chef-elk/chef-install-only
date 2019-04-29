@@ -1,0 +1,65 @@
+#!/bin/bash
+
+set -e
+
+## Single Demo Server for Chef
+
+################# NOTES ###################
+
+sudo yum upgrade -y
+sudo yum install tree vim git -y ## Optional tools to make life easier
+sudo yum install wget -y ## Not optional
+
+## Tested on CentOS 7
+## Source: https://docs.chef.io/install_server.html
+## Verify ports on instance / server are open: https://docs.chef.io/server_firewalls_and_ports.html
+## Intended for Demo use only
+## Make sure to change # FIXME lines as needed
+##
+
+################# CHEF ###################
+DEMOPATH="chef-pem-files"
+
+mkdir -p ${DEMOPATH}
+
+# Setting up the Chef user
+ USERNAME="jaynecobb"      # FIXME
+ FORENAME="Jayne"          # FIXME
+ SURNAME="Cobb"            # FIXME
+ EMAIL="vera@firefly.net"  # FIXME
+ PASSWORD="chef-logzio"    # FIXME
+ FILENAME="${DEMOPATH}/demo.pem"
+
+# Setting up the Chef org
+ SHORTNAME="firefly"       # FIXME
+ ORGNAME="Firefly Logz"    # FIXME
+ ASSOCUSER="${USERNAME}"
+ ORGFILE="${DEMOPATH}/${SHORTNAME}-validator.pem"
+
+CHEFVERSION="12.19.31"
+
+echo -e "\n\n\nInstalling Chef Stable release 12.19.31.\nYou will need to accept license agreement to continue.\n\n"
+sleep .5
+
+# Base Chef server
+sudo yum install wget -y
+
+CHEFFILE="chef-server-core-${CHEFVERSION}-1.el7.x86_64.rpm"
+wget https://packages.chef.io/files/stable/chef-server/${CHEFVERSION}/el/7/${CHEFFILE} -P /tmp/
+sudo rpm -Uvh /tmp/${CHEFFILE}
+
+echo -e "\n\nRunning 'reconfigure', may take up to 5 minutes\n\n"
+ sudo chef-server-ctl reconfigure
+echo -e "\n\nCreating chef user ${USERNAME}\n\n"
+ echo -e "\n\nsudo chef-server-ctl user-create ${USERNAME} ${FORENAME} ${SURNAME} ${EMAIL} '${PASSWORD}' --filename ${FILENAME}\n\n"
+ sudo chef-server-ctl user-create ${USERNAME} ${FORENAME} ${SURNAME} ${EMAIL} '${PASSWORD}' --filename ${FILENAME}
+echo -e "\n\nCreating chef org ${ORGNAME}\n\n"
+ echo -e "\n\nsudo chef-server-ctl org-create ${SHORTNAME} '${ORGNAME}' --association_user ${ASSOCUSER} --filename ${ORGFILE}\n\n"
+ sudo chef-server-ctl org-create ${SHORTNAME} '${ORGNAME}' --association_user ${ASSOCUSER} --filename ${ORGFILE}
+
+# Chef Management Console (optional: if UI needed in demo)
+ sudo chef-server-ctl install chef-manage
+ sudo chef-server-ctl reconfigure
+ sudo chef-manage-ctl reconfigure
+
+echo -e "\n\n\nYou now have a single Chef server.\n"

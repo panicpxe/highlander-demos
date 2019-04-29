@@ -11,6 +11,23 @@ Requirements:
   - `filebeat-demo.yml` : When shipping to the Logzio platform you'll need to supply the appropriate account token
   - `elasticsearch-demo.yml` : You'll need to supply your demo server / instance's IP
 
+# The installation
+
+Once you've made the optional edits to the Chef install and/or the
+mandatory edit in the Elasticsearch configuration (by finding the
+FIXMEs), the full demo can be installed with:
+
+```
+./chef-highlander-demo
+```
+
+If you already have ELK running elsewhere and just need the Chef
+demo:
+
+```
+./chef-install-only
+```
+
 # Troubleshooting
 
 ## Filebeat, Why?
@@ -31,12 +48,15 @@ sudo cat /var/log/messages | grep filebeat | less
 Because building `grok` patterns can be hazardous. Typically
 errors would appear during an attempt at a restart. This is
 visible by checking the status, similar to Filebeat, and then
-looking at the `logstash-plain.log`. If you're making several,
-successive, changes it's probably worth just tmux'ing and tailing
-the log in a window:
+looking at either the `logstash-plain.log` or `/var/log/messages`
+as applies. If you're making several, successive, changes it's 
+probably worth just tmux'ing and tailing the logs in separate
+windows:
 
 ```bash
 sudo tail -f /var/log/logstash/logstash-plain.log
+
+sudo tail -f /var/log/messages | grep logstash
 ```
 
 ## Chef feels left out
