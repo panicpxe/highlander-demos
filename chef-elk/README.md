@@ -1,6 +1,7 @@
 # Running Chef and OSS ELK on Single Server for Demo
 
-Requirements:
+##Requirements
+
 - CentOS 7
 - For AWS, minimum functional instance is type `t3.large`
 - Chef + ELK ports need to be open
@@ -27,6 +28,13 @@ demo:
 ```
 ./chef-install-only
 ```
+
+# The Results
+
+If you are using this I recommend following along the intended
+setup as outlined in the corresponding blog post (TBD). The
+`*.final.*` files are what your resulting files should look like
+for that specific demo / tutorial.
 
 # Troubleshooting
 

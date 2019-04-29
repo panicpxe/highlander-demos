@@ -1,0 +1,63 @@
+#=========================== Filebeat inputs =============================
+filebeat.inputs:
+
+############### CHEF LOGS ###############
+- type: log
+  fields:
+    log_type: chef-access
+  paths:
+    - /var/log/opscode/nginx/*access.log
+  fields_under_root: true
+  encoding: utf-8
+  ignore_older: 3h
+- type: log
+  fields:
+    log_type: chef-solr4
+  paths:
+    - /var/log/opscode/opscode-solr4/current
+  fields_under_root: true
+  encoding: utf-8
+  ignore_older: 3h
+- type: log
+  fields:
+    log_type: chef-mover
+  paths:
+    - /var/log/opscode/opscode-chef-mover/current
+  fields_under_root: true
+  encoding: utf-8
+  ignore_older: 3h
+- type: log
+  fields:
+    log_type: chef-erchef
+  paths:
+    - /var/log/opscode/opscode-erchef/current
+  fields_under_root: true
+  encoding: utf-8
+  ignore_older: 3h
+- type: log
+  fields:
+    log_type: chef-expander
+  paths:
+    - /var/log/opscode/opscode-expander/current
+  fields_under_root: true
+  encoding: utf-8
+  ignore_older: 3h
+
+
+registry_file: /var/lib/filebeat/registry
+
+#============================= Filebeat modules ===============================
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+#==================== Elasticsearch template setting ==========================
+setup.template.settings:
+  index.number_of_shards: 3
+
+#================================ Outputs =====================================
+
+output:
+  logstash:
+    hosts: ["localhost:5044"]
+

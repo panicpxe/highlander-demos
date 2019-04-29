@@ -1,16 +1,7 @@
 #=========================== Filebeat inputs =============================
 filebeat.inputs:
 
-############## DEFAULT ##############
-- type: log
-  enabled: false
-  paths:
-    - /var/log/*.log
-
-############### LOGZIO ###############
-
-
-############### OSS ELK ###############
+############### CHEF LOGS ###############
 - type: log
   paths:
     - /var/log/opscode/nginx/*.log
@@ -33,6 +24,5 @@ setup.template.settings:
 #================================ Outputs =====================================
 
 output:
-############### OSS ELK ###############
   logstash:
-    hosts: ["0.0.0.0:5044"]
+    hosts: ["localhost:5044"]
