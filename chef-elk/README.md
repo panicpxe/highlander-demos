@@ -1,6 +1,6 @@
 # Running Chef and OSS ELK on Single Server for Demo
 
-##Requirements
+## Requirements
 
 - CentOS 7
 - For AWS, minimum functional instance is type `t3.large`
