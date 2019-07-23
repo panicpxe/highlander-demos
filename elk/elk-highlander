@@ -2,8 +2,8 @@
 
 set -e
 
-## Chef Highlander : There Can Be Only One
-## Single Demo Server for both Chef and OSS ELK for Demo Purposes
+## ELK Highlander : There Can Be Only One
+## Single Demo Server for OSS ELK for Demo Purposes
 
 ################# NOTES ###################
 
@@ -21,8 +21,6 @@ errormsg (){
 }
 
 ## Tested on CentOS 7
-## Source: https://docs.chef.io/install_server.html
-## Verify ports on instance / server are open: https://docs.chef.io/server_firewalls_and_ports.html
 ## Intended for Demo use only
 ## Make sure to change # FIXME lines as needed
 ##
@@ -30,7 +28,7 @@ errormsg (){
 ## Please reference their page if you wish to download a different version
 ## than either of the two below:
 ##    https://www.elastic.co/downloads/past-releases/
-ELKVERSION="7.0.0"
+ELKVERSION="7.2.0"
 #ELKVERSION="6.5.4"
 
 if [ -z ${ELKVERSION} ]; then
@@ -43,7 +41,6 @@ fi
 sudo wget https://raw.githubusercontent.com/logzio/public-certificates/master/COMODORSADomainValidationSecureServerCA.crt -P /etc/pki/tls/certs/
 
 FILE="filebeat-${ELKVERSION}-x86_64.rpm"
-
 curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/${FILE}
 sudo rpm -vi ${FILE}
 sudo chkconfig --add filebeat
@@ -60,7 +57,7 @@ infomsg "Starting Elasticsearch ${ELKVERSION} installation"
 sleep 1
 
 ## Needed to add some logic because consistent naming is hard
-if [ ${ELKVERSION} == "7.0.0" ]; then
+if [ ${ELKVERSION} == "7.2.0" ]; then
     FILE="elasticsearch-${ELKVERSION}-x86_64.rpm"
 else
     FILE="elasticsearch-${ELKVERSION}.rpm"
