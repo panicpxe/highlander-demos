@@ -2,7 +2,7 @@
 
 set -e
 
-#sudo yum install maven -y
+sudo yum install maven -y
 
 DEMOAPPDIR="demo-app"
 mkdir ${DEMOAPPDIR}
