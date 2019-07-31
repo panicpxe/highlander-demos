@@ -1,0 +1,24 @@
+input {
+  beats {
+    port => 5044
+    host => "0.0.0.0"
+  }
+}
+filter {
+  if [log_type] == "rabbitmq-server" {
+    grok {
+      match => { "message" => ["%{TIMESTAMP_ISO8601:timestamp} \[%{LOGLEVEL:log_level}\] \<%{DATA:field_misc}\> %{GREEDYDATA:message}"] }
+    }
+  }
+  mutate {
+    add_field => { "token" => "#FIXME" }
+    add_field => { "read_timestamp" => "%{@timestamp}" }
+  }
+}
+output {
+  tcp {
+    host => "listener.logz.io"
+    port => 5050
+    codec => json_lines
+  }
+}

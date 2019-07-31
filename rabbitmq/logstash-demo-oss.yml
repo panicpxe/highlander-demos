@@ -1,0 +1,22 @@
+input {
+  beats {
+    port => 5044
+    host => "0.0.0.0"
+  }
+}
+filter {
+  if [log_type] == "rabbitmq-server" {
+    grok {
+      match => { "message" => ["%{TIMESTAMP_ISO8601:timestamp} \[%{LOGLEVEL:log_level}\] \<%{DATA:field_misc}\> %{GREEDYDATA:message}"] }
+    }
+  }
+  mutate {
+    add_field => { "read_timestamp" => "%{@timestamp}" }
+  }
+}
+output {
+  elasticsearch {
+      hosts => "localhost:9200"
+      index => "%{[@metadata][beat]}-%{[@metadata][version]}-%{+YYYY.MM.dd}"
+  }
+}

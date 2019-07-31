@@ -4,7 +4,7 @@ set -e
 
 sudo yum install maven -y
 
-DEMOAPPDIR="demo-app"
+DEMOAPPDIR="demo-app" # FIXME : may want to change to a different directory
 mkdir ${DEMOAPPDIR}
 cd ${DEMOAPPDIR}
 REPONAME="rabbitmq-jms-client-spring-boot-trader-demo"

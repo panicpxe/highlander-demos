@@ -1,0 +1,51 @@
+#=========================== Filebeat inputs =============================
+filebeat.inputs:
+
+############## DEFAULT ##############
+- type: log
+  enabled: false
+  paths:
+    - /var/log/*.log
+
+############### RABBITMQ LOGS ###############
+- type: log
+  fields:
+    log_type: rabbitmq-server
+   # logzio_codec: plain
+   # token: { YOUR LOGZIO TOKEN }
+  paths:
+    - /var/log/rabbitmq/*log
+  fields_under_root: true
+  encoding: utf-8
+  ignore_older: 3h
+
+registry_file: /var/lib/filebeat/registry
+
+#============================= Filebeat modules ===============================
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+#==================== Elasticsearch template setting ==========================
+setup.template.settings:
+  index.number_of_shards: 3
+
+#================================ Outputs =====================================
+
+## Shipping to local Logstash
+output:
+  logstash:
+    hosts: ["localhost:5044"]
+
+## Shipping direct to local Elasticsearch
+#output:
+#  elasticsearch:
+#    hosts: ["localhost:9200"]
+
+## Shipping direct to Logzio
+#output:
+#  logstash:
+#    hosts: ["listener.logz.io:5015"]
+#    ssl:
+#      certificate_authorities: ['/etc/pki/tls/certs/COMODORSADomainValidationSecureServerCA.crt']
+
