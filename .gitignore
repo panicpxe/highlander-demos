@@ -3,3 +3,4 @@
 chef-elk/chef-pem-files
 */*.rpm
 */*.bkp
+rabbitmq/demo-app
