@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+#sudo yum install maven -y
+
+DEMOAPPDIR="demo-app"
+mkdir ${DEMOAPPDIR}
+cd ${DEMOAPPDIR}
+REPONAME="rabbitmq-jms-client-spring-boot-trader-demo"
+git clone https://github.com/rabbitmq/${REPONAME}
+cd ${REPONAME}
+mvn clean package
+
+echo -e "\n\nRun demo app with:\n\tjava -jar ${DEMOAPPDIR}/${REPONAME}/target/rabbit-jms-boot-demo-\$\{VERSION\}-SNAPSHOT.jar\n"
+echo "Recommend using tmux if you would like to do other things."
+
+exit 0
