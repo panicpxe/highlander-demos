@@ -11,14 +11,20 @@ filter {
     }
   }
   mutate {
-    add_field => { "token" => "#FIXME" }
     add_field => { "read_timestamp" => "%{@timestamp}" }
+    #add_field => { "token" => "#FIXME - only needed if shipping to Logzio" }
   }
 }
 output {
-  tcp {
-    host => "listener.logz.io"
-    port => 5050
-    codec => json_lines
+  elasticsearch {
+      hosts => "localhost:9200"
+      index => "%{[@metadata][beat]}-%{[@metadata][version]}-%{+YYYY.MM.dd}"
   }
 }
+#output {
+#  tcp {
+#    host => "listener.logz.io"
+#    port => 5050
+#    codec => json_lines
+#  }
+#}
