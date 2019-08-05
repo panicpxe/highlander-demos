@@ -76,4 +76,6 @@ sudo rabbitmqctl add_user ${ADMINUSER} ${ADMINPASS}
 sudo rabbitmqctl set_user_tags ${ADMINUSER} administrator
 sudo rabbitmqctl set_permissions -p / ${ADMINUSER} ".*" ".*" ".*"
 
+infomsg "Your Rabbit console / admin username and password are:"
+echo -e "\n\t${ADMINUSER} : ${ADMINPASS}\n"
 exit 0
