@@ -38,10 +38,10 @@ Locations for files:
 
 There are a few methods for shipping the RabbitMQ logs to an ELK
 stack, in this case they are as follows:
-- Filebeat -> Logzio platform
-- Filebeat -> OSS Elasticsearch
-- Filebeat -> Logstash -> Logzio platform
-- Filebeat -> Logstash -> OSS Elasticsearch
+- Filebeat, Metricbeat -> Logzio platform
+- Filebeat, Metricbeat -> OSS Elasticsearch
+- Filebeat, Metricbeat -> Logstash -> Logzio platform
+- Filebeat, Metricbeat -> Logstash -> OSS Elasticsearch
 
 In both the Filebeat and Logstash configuration files you'll
 notice some outputs are commented out. This is so that you have
@@ -55,6 +55,83 @@ logs at all, then in the Filebeat configuration you'll need to use
 the "Shipping to local Logstash section" and in the Logstash
 configuration file you'll need to uncomment the appropriate
 output, which is either Elasticsearch or Logzio.
+
+## Some things of note for Metricbeat
+
+In earlier versions of the setup, I ran into a couple of errors:
+
+```
+$ ./metricbeat modules list
+Error initializing beat: error loading config file: stat
+metricbeat.yml: no such file or directory
+```
+
+This can be solved a couple of ways. One is by using `-c` to
+explicitly supply the path to the configuration file, like so:
+
+```
+$ ./metricbeat -c /etc/metricbeat/metricbeat.yml modules list
+Error initializing beat: error loading config file: open
+/etc/metricbeat/metricbeat.yml: permission denied
+```
+
+Note that `metricbeat` needs to be run via `sudo`, so:
+
+```
+$ sudo ./metricbeat -c /etc/metricbeat/metricbeat.yml modules list
+Enabled:
+
+Disabled:
+```
+
+You can see here that simply supplying the configuration path
+wasn't enough to fix the issue, as the RabbitMQ module (and
+others) would not be recognized:
+
+```
+$ sudo ./metricbeat -c /etc/metricbeat/metricbeat.yml modules enable rabbitmq
+Module rabbitmq doesn't exist!
+```
+
+At this point I (and you) should verify that the modules are in
+fact in the `modules.d` directory (they are in this case):
+
+```
+ls /etc/metricbeat/modules.d/
+aerospike.yml.disabled  dropwizard.yml.disabled
+jolokia.yml.disabled       mssql.yml.disabled
+redis.yml.disabled
+apache.yml.disabled     elasticsearch-xpack.yml.disabled
+kafka.yml.disabled         munin.yml.disabled       system.yml
+{{ output truncated }}
+```
+
+So what's going on? In this case supplying the path to _only_ the
+configuration file doesn't tell `metricbeat` where the rest of
+it's relevant components are - including the modules. To fix that,
+use `--path.home`:
+
+```
+$ sudo ./metricbeat --path.home /etc/metricbeat/ modules list
+Enabled:
+rabbitmq
+system
+
+Disabled:
+aerospike
+apache
+aws
+ceph
+{{ output truncated }}
+```
+
+At this point you should be able to view, enable, and disable all
+the plugins available to Metricbeat.
+
+**Note:** You should only run the Metricbeat command as
+`./metricbeat` if `metricbeat` doesn't work (e.g. there's nothing
+in `which metricbeat`). In my case, the binary was in
+`/usr/share/meticbeat/bin`, but your mileage may vary.
 
 ## Addendum: Installing RabbitMQ Configuration
 Some additional notes about this setup that I ran into:
