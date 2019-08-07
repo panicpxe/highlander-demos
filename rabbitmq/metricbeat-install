@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -e
+
+sudo yum install wget -y ## Not optional
+
+infomsg (){
+    tput setaf 2; tput bold; echo -e "\n\nHighlander Msg:"
+    tput setaf 3; tput bold; echo -e "${1}\n\n"; tput sgr0
+}
+errormsg (){
+    tput setaf 2; tput bold; echo -e "Highlander Msg:"
+    tput setaf 1; tput bold; echo -e "${1}\n"; tput sgr0
+}
+
+## Tested on CentOS 7
+## Intended for Demo use only
+## Make sure to change # FIXME lines as needed
+##
+## Elastic is consistent-ish with their naming conventions for past versions
+## Please reference their page if the download fails if/when you change the version
+##    https://www.elastic.co/downloads/past-releases/
+ELKVERSION="7.2.0"
+
+################ METRICBEAT ##################
+
+infomsg "Installing Metricbeat..."
+FILE="metricbeat-${ELKVERSION}-x86_64.rpm"
+curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/${FILE}
+sudo rpm -vi ${FILE}
+sudo chkconfig --add metricbeat
+sudo mv /etc/metricbeat/metricbeat.yml{,.bkp}
+sudo cp metricbeat-demo.yml /etc/metricbeat/metricbeat.yml
+sudo service metricbeat start
+metricbeat version
+
+infomsg "Enabling RabbitMQ module"
+sudo metricbeat modules enable rabbitmq
+sudo service metricbeat restart
+
+rm ${FILE}
+
+exit 0
