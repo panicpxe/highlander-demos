@@ -1,0 +1,29 @@
+metricbeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+## Added for RabbitMQ
+metricbeat.modules:
+- module: rabbitmq
+  metricsets: ["node", "queue", "connection"]
+  enabled: true
+  period: 10s
+  hosts: ["localhost:15672"]
+
+setup.template.settings:
+  index.number_of_shards: 1
+  index.codec: best_compression
+setup.kibana:
+  #host: "localhost:5601"
+
+## Shipping to local Elasticsearch
+#output.elasticsearch:
+#  hosts: ["localhost:9200"]
+
+## Shipping to local Logstash
+output.logstash:
+  hosts: ["localhost:5044"]
+
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
